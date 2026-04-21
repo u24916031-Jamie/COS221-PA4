@@ -2,7 +2,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class AWTTabs extends Frame implements ActionListener {
-	// CardLayout will manage the switching of panels
 	CardLayout cardLayout;
 	Panel contentPanel;
 
