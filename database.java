@@ -2,6 +2,7 @@ import java.sql.DriverManager;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public class Database {
 	private static Database instance;
@@ -17,8 +18,17 @@ public class Database {
 
 			instance = new Database();
 			try {
+				Dotenv dotenv = Dotenv.load();
+				String proto = dotenv.get("CHINOOK_DB_PROTO");
+				String host = dotenv.get("CHINOOK_DB_HOST");
+				String port = dotenv.get("CHINOOK_DB_PORT");
+				String DBname = dotenv.get("CHINOOK_DB_NAME");
+				String username = dotenv.get("CHINOOK_DB_USERNAME");
+				String password = dotenv.get("CHINOOK_DB_PASSWORD");
+
 				conn = DriverManager
-						.getConnection("jdbc:mariadb://localhost:3306/u24916031_chinook?user=root&password=root");
+						.getConnection(proto + "://" + host + ":" + port + "/" + DBname + "?user=" + username
+								+ "&password=" + password);
 
 				Statement stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery("SELECT * FROM employee");
