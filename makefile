@@ -1,3 +1,4 @@
 all:
-	javac *.java
+	del *.class
+	javac -cp ".;lib/*" *.java
 	java -cp ".;lib/*" Main
