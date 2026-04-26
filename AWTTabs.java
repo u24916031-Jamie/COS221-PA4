@@ -1,9 +1,16 @@
 import java.awt.*;
 import java.awt.event.*;
 
-public class AWTTabs extends Frame implements ActionListener {
+public class AWTTabs extends Frame implements ItemListener, ActionListener {
 	CardLayout cardLayout;
 	Panel contentPanel;
+
+	EmployeesPanel ep = new EmployeesPanel();
+
+	Panel tracksPanel;
+	Panel reportPanel;
+	Panel notificationsPanel;
+	Panel customerRecommendationsPanel;
 
 	public AWTTabs() {
 		setTitle("AWT Custom Tabs");
@@ -32,11 +39,16 @@ public class AWTTabs extends Frame implements ActionListener {
 		cardLayout = new CardLayout();
 		contentPanel = new Panel(cardLayout);
 
-		contentPanel.add(employeesPanel(), "Employees");
-		contentPanel.add(tracksPanel(), "Tracks");
-		contentPanel.add(reportPanel(), "Report");
-		contentPanel.add(notificationsPanel(), "Notifications");
-		contentPanel.add(customerRecommendationsPanel(), "Customer Recommendations");
+		tracksPanel = makeTracksPanel();
+		reportPanel = makeReportPanel();
+		notificationsPanel = makeNotificationsPanel();
+		customerRecommendationsPanel = makeCustomerRecommendationsPanel();
+
+		contentPanel.add(ep.getRoot(), "Employees", 0);
+		contentPanel.add(tracksPanel, "Tracks", 1);
+		contentPanel.add(reportPanel, "Report", 2);
+		contentPanel.add(notificationsPanel, "Notifications", 3);
+		contentPanel.add(customerRecommendationsPanel, "Customer Recommendations", 4);
 
 		add(tabMenu, BorderLayout.NORTH);
 		add(contentPanel, BorderLayout.CENTER);
@@ -63,52 +75,7 @@ public class AWTTabs extends Frame implements ActionListener {
 		return p;
 	}
 
-	private Panel employeesPanel() {
-		Panel root = new Panel(new BorderLayout());
-		root.setBackground(Color.LIGHT_GRAY);
-		Panel employeeFilter = new Panel(new FlowLayout(FlowLayout.LEFT));
-
-		TextField filter = new TextField(30);
-		Button search = new Button("Search");
-		employeeFilter.add(filter);
-		employeeFilter.add(search);
-		ScrollPane scrollPane = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
-		scrollPane.setBackground(Color.RED);
-
-		Panel employeeData = new Panel(new GridLayout(2, 8, 1, 1));
-		employeeData.setBackground(Color.RED);
-
-		employeeData.setPreferredSize(new Dimension(100 * 8, 50 * 2));
-		employeeData.setBackground(Color.DARK_GRAY);
-		employeeData.add(createCell("First Name", true));
-		employeeData.add(createCell("Last Name", true));
-		employeeData.add(createCell("Title", true));
-		employeeData.add(createCell("City", true));
-		employeeData.add(createCell("Country", true));
-		employeeData.add(createCell("Phone", true));
-		employeeData.add(createCell("Reports-to", true));
-		employeeData.add(createCell("Active", true));
-
-		// --- Row 1 ---
-		employeeData.add(createCell("101", false));
-		employeeData.add(createCell("Alice", false));
-		employeeData.add(createCell("Admin", false));
-
-		// --- Row 2 ---
-		employeeData.add(createCell("102", false));
-		employeeData.add(createCell("Bob", false));
-		employeeData.add(createCell("Editor", false));
-		employeeData.add(createCell("Bob", false));
-		employeeData.add(createCell("Editor", false));
-
-		scrollPane.add(employeeData);
-		root.add(employeeFilter, BorderLayout.NORTH);
-		root.add(scrollPane, BorderLayout.CENTER);
-
-		return root;
-	}
-
-	private Panel tracksPanel() {
+	private Panel makeTracksPanel() {
 
 		Panel root = new Panel();
 		root.setBackground(Color.GRAY);
@@ -117,7 +84,7 @@ public class AWTTabs extends Frame implements ActionListener {
 		return root;
 	}
 
-	private Panel reportPanel() {
+	private Panel makeReportPanel() {
 
 		Panel root = new Panel();
 		root.setBackground(Color.GRAY);
@@ -126,7 +93,7 @@ public class AWTTabs extends Frame implements ActionListener {
 		return root;
 	}
 
-	private Panel notificationsPanel() {
+	private Panel makeNotificationsPanel() {
 		Panel root = new Panel();
 		root.setBackground(Color.GRAY);
 		root.add(new Label("Notifications"));
@@ -134,7 +101,7 @@ public class AWTTabs extends Frame implements ActionListener {
 		return root;
 	}
 
-	private Panel customerRecommendationsPanel() {
+	private Panel makeCustomerRecommendationsPanel() {
 		Panel root = new Panel();
 		root.setBackground(Color.GRAY);
 		root.add(new Label("Customer Recommendations"));
@@ -148,7 +115,9 @@ public class AWTTabs extends Frame implements ActionListener {
 		cardLayout.show(contentPanel, cmd);
 	}
 
-	public static void main(String[] args) {
-		new AWTTabs();
+	public void itemStateChanged(ItemEvent e) {
+
+		String cmd = e.getItem().toString();
+		System.out.println(cmd);
 	}
 }

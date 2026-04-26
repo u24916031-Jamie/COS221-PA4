@@ -22,9 +22,9 @@ public class Main {
 	public static void main(String[] args) {
 		Database db = Database.getInstance();
 		// print(db.getCustomers("", "", true));
-		printarr(db.getSpendingSummary(1));
-		printarr(db.getSpendingSummary(2));
-		printarr(db.getRecommendations(2));
+		// printarr(db.getSpendingSummary(1));
+		// printarr(db.getSpendingSummary(2));
+		// printarr(db.getRecommendations(2));
 		new AWTTabs();
 
 	}

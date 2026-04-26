@@ -41,30 +41,34 @@ public class Database {
 		return instance;
 	}
 
-	public ArrayList<String[]> getEmployees(String filter) {
+	public ArrayList<String[]> getEmployees(String column, String filter) {
 		try {
+			System.out.println(column + " " + filter);
 			ArrayList<String[]> arr = new ArrayList<>();
-			String sql = "SELECT e1.firstname AS firstname, e1.title AS title, e1.city AS city, e1.country AS country, e1.phone AS phone, e2.firstname AS supervisor FROM employee AS e1 JOIN employee AS e2 on e1.reportsto = e2.employeeid";
+			String sql = "SELECT e1.firstname AS firstname,e1.lastname AS lastname, e1.title AS title, e1.city AS city, e1.country AS country, e1.phone AS phone, e2.firstname AS supervisor FROM employee AS e1 LEFT JOIN employee AS e2 on e1.reportsto = e2.employeeid";
 
-			if (filter.compareTo("") != 0) {
-				sql += " WHERE firstname LIKE %?% OR country LIKE %?%";
+			if (!filter.trim().equals("")) {
+				sql += " WHERE e1." + column + " LIKE ?";
 
 			}
+			System.out.println(sql);
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			if (filter.compareTo("") != 0) {
-				stmt.setString(0, filter);
+			if (!filter.trim().equals("")) {
+				stmt.setString(1, "%" + filter.trim() + "%");
 
 			}
 			ResultSet rs = stmt.executeQuery();
 
 			while (rs.next()) {
-				String[] temp = new String[6];
+				String[] temp = new String[8];
 				temp[0] = rs.getString("firstname");
-				temp[1] = rs.getString("title");
-				temp[2] = rs.getString("city");
-				temp[3] = rs.getString("country");
-				temp[4] = rs.getString("phone");
-				temp[5] = rs.getString("supervisor");
+				temp[1] = rs.getString("lastname");
+				temp[2] = rs.getString("title");
+				temp[3] = rs.getString("city");
+				temp[4] = rs.getString("country");
+				temp[5] = rs.getString("phone");
+				temp[6] = rs.getString("supervisor");
+				temp[7] = "True";
 
 				arr.add(temp);
 			}
