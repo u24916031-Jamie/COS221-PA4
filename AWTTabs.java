@@ -6,6 +6,7 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 	Panel contentPanel;
 
 	EmployeesPanel ep = new EmployeesPanel();
+	TracksPanel tp = new TracksPanel();
 
 	Panel tracksPanel;
 	Panel reportPanel;
@@ -14,7 +15,7 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 
 	public AWTTabs() {
 		setTitle("AWT Custom Tabs");
-		setSize(800, 300);
+		setSize(1280, 720);
 		setLayout(new BorderLayout());
 
 		Panel tabMenu = new Panel(new FlowLayout(FlowLayout.LEFT));
@@ -39,13 +40,12 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 		cardLayout = new CardLayout();
 		contentPanel = new Panel(cardLayout);
 
-		tracksPanel = makeTracksPanel();
 		reportPanel = makeReportPanel();
 		notificationsPanel = makeNotificationsPanel();
 		customerRecommendationsPanel = makeCustomerRecommendationsPanel();
 
 		contentPanel.add(ep.getRoot(), "Employees", 0);
-		contentPanel.add(tracksPanel, "Tracks", 1);
+		contentPanel.add(tp.getRoot(), "Tracks", 1);
 		contentPanel.add(reportPanel, "Report", 2);
 		contentPanel.add(notificationsPanel, "Notifications", 3);
 		contentPanel.add(customerRecommendationsPanel, "Customer Recommendations", 4);
@@ -60,28 +60,6 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 		});
 
 		setVisible(true);
-	}
-
-	private Panel createCell(String text, boolean isHeader) {
-		Panel p = new Panel(new FlowLayout(FlowLayout.CENTER));
-		p.setBackground(isHeader ? Color.GRAY : Color.LIGHT_GRAY);
-		p.setSize(new Dimension(50, 20));
-		Label label = new Label(text);
-		if (isHeader) {
-			label.setFont(new Font("Arial", Font.BOLD, 12));
-		}
-
-		p.add(label);
-		return p;
-	}
-
-	private Panel makeTracksPanel() {
-
-		Panel root = new Panel();
-		root.setBackground(Color.GRAY);
-		root.add(new Label("Tracks"));
-
-		return root;
 	}
 
 	private Panel makeReportPanel() {

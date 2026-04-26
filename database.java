@@ -1,7 +1,6 @@
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.ResultSet;
 
 import java.util.ArrayList;
@@ -81,7 +80,7 @@ public class Database {
 		return null;
 	}
 
-	public ArrayList<String[]> getTracks(String column, String filter, int id) {
+	public ArrayList<String[]> getTracks(String column, String filter, int id, int page) {
 		try {
 			ArrayList<String[]> arr = new ArrayList<>();
 			String sql = "SELECT track.name AS name, album.title AS album, mt.name AS mediatype, genre.name AS genre, track.composer AS composer";
@@ -91,19 +90,20 @@ public class Database {
 				sql += " WHERE track.trackid = ?";
 			} else {
 
-				if (filter.compareTo("") != 0) {
-					sql += " WHERE " + column + " LIKE %?%";
+				if (!filter.equals("")) {
+					sql += " WHERE " + column + " LIKE ?";
 
 				}
 			}
 			// System.out.println(sql);
+			sql += " ORDER BY track.trackid LIMIT 100 OFFSET " + page * 100;
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			if (id != -1) {
 				stmt.setInt(1, id);
 			} else {
 
-				if (filter.compareTo("") != 0) {
-					stmt.setString(1, filter);
+				if (!filter.equals("")) {
+					stmt.setString(1, "%" + filter + "%");
 
 				}
 			}
@@ -368,7 +368,7 @@ public class Database {
 
 				int temp = rs.getInt("rectrack");
 
-				arr.add(getTracks("", "", temp).get(0));
+				arr.add(getTracks("", "", temp, 0).get(0));
 			}
 
 			return arr;
