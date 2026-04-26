@@ -77,26 +77,36 @@ public class Database {
 		return null;
 	}
 
-	public ArrayList<String[]> getTracks(String column, String filter) {
+	public ArrayList<String[]> getTracks(String column, String filter, int id) {
 		try {
 			ArrayList<String[]> arr = new ArrayList<>();
 			String sql = "SELECT track.name AS name, album.title AS album, mt.name AS mediatype, genre.name AS genre, track.composer AS composer";
 			sql += ", CONCAT(FLOOR(track.milliseconds / 60000),':',LPAD(FLOOR((track.milliseconds % 60000) / 1000), 2, '0'))";
-			sql += " AS minutes_seconds FROM track NATURAL JOIN album NATURAL JOIN genre NATURAL JOIN mediatype AS mt";
+			sql += " AS minutes_seconds FROM track JOIN album on track.albumid = album.albumid JOIN genre ON track.genreid = genre.genreid JOIN mediatype AS mt ON track.mediatypeid = mt.mediatypeid";
+			if (id != -1) {
+				sql += " WHERE track.trackid = ?";
+			} else {
 
-			if (filter.compareTo("") != 0) {
-				sql += " WHERE " + column + " LIKE %?%";
+				if (filter.compareTo("") != 0) {
+					sql += " WHERE " + column + " LIKE %?%";
 
+				}
 			}
+			// System.out.println(sql);
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			if (filter.compareTo("") != 0) {
-				stmt.setString(0, filter);
+			if (id != -1) {
+				stmt.setInt(1, id);
+			} else {
 
+				if (filter.compareTo("") != 0) {
+					stmt.setString(1, filter);
+
+				}
 			}
 			ResultSet rs = stmt.executeQuery();
 
 			while (rs.next()) {
-				String[] temp = new String[7];
+				String[] temp = new String[6];
 				temp[0] = rs.getString("name");
 				temp[1] = rs.getString("album");
 				temp[2] = rs.getString("mediatype");
@@ -183,8 +193,7 @@ public class Database {
 				sql += " WHERE " + column + " LIKE %?%";
 
 			}
-			sql += ";";
-			System.out.println(sql);
+			// System.out.println(sql);
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			if (filter.compareTo("") != 0) {
 				stmt.setString(0, filter);
@@ -273,6 +282,97 @@ public class Database {
 
 		}
 		return false;
+	}
+
+	public ArrayList<String[]> getSpendingSummary(int customerId) {
+		try {
+			ArrayList<String[]> arr = new ArrayList<>();
+			// total spent, num purcahses, date of most recent purchase
+			String sql = "SELECT SUM(unitprice) AS totalspent, COUNT(DISTINCT invoiceid) as numpurchases, MAX(invoicedate) AS mostrecentpurchase FROM customer NATURAL JOIN invoice NATURAL JOIN invoiceline WHERE customerid = ? ORDER BY customerid";
+
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, customerId);
+			stmt.setInt(2, customerId);
+			stmt.setInt(3, customerId);
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+				String[] temp = new String[3];
+				temp[0] = rs.getString("totalspent");
+				temp[1] = rs.getString("numpurchases");
+				temp[2] = rs.getString("mostrecentpurchase");
+
+				arr.add(temp);
+			}
+
+			return arr;
+		} catch (Exception e) {
+			System.err.println(e.toString());
+
+		}
+		return null;
+	}
+
+	public ArrayList<String[]> getFavGenres(int customerId) {
+		try {
+			ArrayList<String[]> arr = new ArrayList<>();
+			// total spent, num purcahses, date of most recent purchase
+			String sql = "SELECT g.genreid AS genreid, g.name AS genrename, COUNT(g.genreid) AS genrecount FROM customer AS c NATURAL JOIN invoice AS i NATURAL JOIN invoiceline AS il NATURAL JOIN track AS t JOIN genre AS g ON t.GenreId = g.genreid WHERE customerid = ? GROUP BY g.genreid ORDER BY COUNT(g.genreid) DESC";
+
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, customerId);
+
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+				String[] temp = new String[3];
+				temp[0] = rs.getString("genreid");
+				temp[1] = rs.getString("genrename");
+				temp[2] = rs.getString("genrecount");
+
+				arr.add(temp);
+			}
+
+			return arr;
+		} catch (Exception e) {
+			System.err.println(e.toString());
+
+		}
+		return null;
+	}
+
+	public ArrayList<String[]> getRecommendations(int customerId) {
+		try {
+			ArrayList<String[]> arr = new ArrayList<>();
+			// total spent, num purcahses, date of most recent purchase
+
+			String mostFreqGenres = "WITH freqgenres AS (SELECT g.genreid AS genreid, COUNT(g.genreid) AS genrecount FROM customer AS c JOIN invoice AS i ON c.customerid = i.customerid JOIN invoiceline AS il ON i.invoiceid = il.invoiceid JOIN track AS t ON il.trackid = t.trackid JOIN genre AS g ON t.GenreId = g.genreid WHERE c.customerid = ? GROUP BY g.genreid ORDER BY COUNT(g.genreid) DESC)";
+			String boughtTracks = "boughttracks AS (SELECT t.trackid AS boughtid, t.albumid AS boughtalbum FROM track AS t JOIN invoiceline AS il ON t.trackid = il.trackid JOIN invoice AS i ON il.invoiceid = i.invoiceid JOIN customer AS c ON c.customerid = i.customerid WHERE c.customerid = ?)";
+			String sameGenreRec = "(SELECT t.trackid AS rectrack FROM track AS t JOIN freqgenres ON freqgenres.genreid = t.genreid WHERE t.trackid NOT IN (SELECT boughtid FROM boughttracks) LIMIT 10)";
+
+			String sameAlbumTracks = "(SELECT t.trackid AS rectrack FROM album AS a JOIN track AS t ON a.albumid = t.albumid LEFT JOIN boughttracks AS bt on t.trackid = bt.boughtid WHERE t.trackid NOT IN (SELECT boughtid FROM boughttracks) AND a.albumid = bt.boughtalbum LIMIT 10)";
+
+			String sql = mostFreqGenres + ", " + boughtTracks + " " + sameGenreRec + " UNION " + sameAlbumTracks;
+			// System.out.println(sql);
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, customerId);
+			stmt.setInt(2, customerId);
+
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+
+				int temp = rs.getInt("rectrack");
+
+				arr.add(getTracks("", "", temp).get(0));
+			}
+
+			return arr;
+		} catch (Exception e) {
+			System.err.println(e.toString());
+
+		}
+		return null;
 	}
 
 }
