@@ -9,7 +9,8 @@ public class TracksPanel extends Component implements ActionListener {
 	Choice columnChoice;
 	TextField filter;
 	Label pageNum;
-	int page = 0;
+	int page = 1;
+	int numCols = 6;
 
 	public Panel getRoot() {
 		return root;
@@ -50,7 +51,7 @@ public class TracksPanel extends Component implements ActionListener {
 		ScrollPane scrollPane = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
 		scrollPane.setBackground(Color.RED);
 
-		data = new Panel(new GridLayout(0, 6, 1, 1));
+		data = new Panel(new GridLayout(0, numCols, 1, 1));
 		data.setBackground(Color.DARK_GRAY);
 
 		updateData();
@@ -90,10 +91,9 @@ public class TracksPanel extends Component implements ActionListener {
 				data.add(createCell(ret.get(i)[j], false));
 			}
 		}
-		int rowCount = (data.getComponentCount() / 6);
-		int fixedRowHeight = 30; // Set your desired row height here
+		int rowCount = (data.getComponentCount() / numCols);
+		int fixedRowHeight = 30;
 
-		// Force the panel to be tall enough to maintain the row height
 		data.setPreferredSize(new Dimension(1280, rowCount * fixedRowHeight));
 
 		data.revalidate();
@@ -129,8 +129,12 @@ public class TracksPanel extends Component implements ActionListener {
 			default:
 				break;
 		}
-		pageNum.setText("Showing page " + page + 1 + " of results");
-		page = Math.max(page, 0);
-		updateData();
+		pageNum.setText("Showing page " + page + " of results");
+		if (page == 0) {
+			page = Math.max(page, 1);
+		} else {
+			page = Math.max(page, 1);
+			updateData();
+		}
 	}
 }

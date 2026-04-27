@@ -42,7 +42,6 @@ public class Database {
 
 	public ArrayList<String[]> getEmployees(String column, String filter) {
 		try {
-			System.out.println(column + " " + filter);
 			ArrayList<String[]> arr = new ArrayList<>();
 			String sql = "SELECT e1.firstname AS firstname,e1.lastname AS lastname, e1.title AS title, e1.city AS city, e1.country AS country, e1.phone AS phone, e2.firstname AS supervisor FROM employee AS e1 LEFT JOIN employee AS e2 on e1.reportsto = e2.employeeid";
 
@@ -50,7 +49,6 @@ public class Database {
 				sql += " WHERE e1." + column + " LIKE ?";
 
 			}
-			System.out.println(sql);
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			if (!filter.trim().equals("")) {
 				stmt.setString(1, "%" + filter.trim() + "%");
@@ -95,8 +93,7 @@ public class Database {
 
 				}
 			}
-			// System.out.println(sql);
-			sql += " ORDER BY track.trackid LIMIT 100 OFFSET " + page * 100;
+			sql += " ORDER BY track.trackid LIMIT 100 OFFSET " + (page - 1) * 100;
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			if (id != -1) {
 				stmt.setInt(1, id);
@@ -156,15 +153,15 @@ public class Database {
 	public ArrayList<String[]> getReport() {
 		try {
 			ArrayList<String[]> arr = new ArrayList<>();
-			String sql = "SELECT genre.title AS genre, SUM(il.unitprice) AS total";
-			sql += " FROM genre NATURAL JOIN track NATURAL JOIN invoiceline AS il GROUP BY genre.genreId ORDER BY total DESC";
+			String sql = "SELECT genre.name AS genre, SUM(il.unitprice) AS total";
+			sql += " FROM genre JOIN track ON genre.genreid = track.genreid JOIN invoiceline AS il ON il.trackid = track.trackid GROUP BY genre.genreId ORDER BY total DESC";
 
 			PreparedStatement stmt = conn.prepareStatement(sql);
 
 			ResultSet rs = stmt.executeQuery();
 
 			while (rs.next()) {
-				String[] temp = new String[7];
+				String[] temp = new String[2];
 				temp[0] = rs.getString("genre");
 				temp[1] = rs.getString("total");
 
@@ -179,27 +176,35 @@ public class Database {
 		return null;
 	}
 
-	public ArrayList<String[]> getCustomers(String column, String filter, boolean inactive) {
+	public ArrayList<String[]> getCustomers(String column, String filter, boolean inactive, int customerId) {
 		try {
 			ArrayList<String[]> arr = new ArrayList<>();
 
 			String sql = "SELECT cus.customerId, cus.firstname, cus.lastname, cus.email, cus.phone, cus.country FROM ";
+
 			if (inactive == false) {
 				sql += "customer AS cus";
 			} else {
 
 				sql += "( SELECT c.customerId, firstname, lastname, email, phone, country FROM customer AS c LEFT JOIN invoice AS i ON c.customerid = i.customerid GROUP BY c.customerid HAVING MAX(i.invoicedate) IS NULL OR MAX(i.invoicedate) < DATE_SUB(NOW(), INTERVAL 2 YEAR) ) AS cus";
 			}
+			if (customerId != -1) {
+				sql += " WHERE cus.customerid = ?";
+			} else {
 
-			if (!filter.equals("")) {
-				sql += " WHERE " + column + " LIKE %?%";
+				if (!filter.equals("")) {
+					sql += " WHERE cus." + column + " LIKE %?%";
 
+				}
 			}
-			// System.out.println(sql);
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			if (filter.compareTo("") != 0) {
-				stmt.setString(0, filter);
+			if (customerId != -1) {
+				stmt.setInt(1, customerId);
+			} else {
+				if (!filter.equals("")) {
+					stmt.setString(1, filter);
 
+				}
 			}
 
 			ResultSet rs = stmt.executeQuery();
@@ -227,16 +232,16 @@ public class Database {
 	public boolean updateCustomer(String[] data) {
 		try {
 
-			String sql = "UPDATE SET firstname = ?, lastname = ?, email = ?, phone = ?, country = ? FROM customer WHERE customerId = ?";
+			String sql = "UPDATE customer SET firstname = ?, lastname = ?, email = ?, phone = ?, country = ? WHERE customerId = ?";
 
 			PreparedStatement stmt = conn.prepareStatement(sql);
 
-			stmt.setString(0, data[1]);
-			stmt.setString(1, data[2]);
-			stmt.setString(2, data[3]);
-			stmt.setString(3, data[4]);
-			stmt.setString(4, data[5]);
-			stmt.setInt(5, Integer.parseInt(data[0]));
+			stmt.setString(1, data[0]);
+			stmt.setString(2, data[1]);
+			stmt.setString(3, data[2]);
+			stmt.setString(4, data[3]);
+			stmt.setString(5, data[4]);
+			stmt.setInt(6, Integer.parseInt(data[5]));
 
 			return (stmt.executeUpdate() > 0);
 
@@ -251,14 +256,14 @@ public class Database {
 		try {
 
 			String sql = "INSERT INTO customer (customerId, firstname, lastname, email, phone, country) ";
-			sql += "VALUES ((SELECT customerId FROM customer ORDER BY customerId DESC LIMIT 1), ?, ?, ?, ?, ?)";
+			sql += "VALUES ((SELECT customerId FROM customer ORDER BY customerId DESC LIMIT 1) + 1, ?, ?, ?, ?, ?)";
 			PreparedStatement stmt = conn.prepareStatement(sql);
 
-			stmt.setString(0, data[0]);
-			stmt.setString(1, data[1]);
-			stmt.setString(2, data[2]);
-			stmt.setString(3, data[3]);
-			stmt.setString(4, data[4]);
+			stmt.setString(1, data[0]);
+			stmt.setString(2, data[1]);
+			stmt.setString(3, data[2]);
+			stmt.setString(4, data[3]);
+			stmt.setString(5, data[4]);
 
 			return (stmt.executeUpdate() > 0);
 
@@ -275,7 +280,7 @@ public class Database {
 			String sql = "DELETE FROM customer WHERE customerId = ?";
 			PreparedStatement stmt = conn.prepareStatement(sql);
 
-			stmt.setInt(0, customerId);
+			stmt.setInt(1, customerId);
 
 			return (stmt.executeUpdate() > 0);
 
@@ -355,7 +360,6 @@ public class Database {
 			String sameAlbumTracks = "(SELECT t.trackid AS rectrack FROM album AS a JOIN track AS t ON a.albumid = t.albumid LEFT JOIN boughttracks AS bt on t.trackid = bt.boughtid WHERE t.trackid NOT IN (SELECT boughtid FROM boughttracks) AND a.albumid = bt.boughtalbum LIMIT 10)";
 
 			String sql = mostFreqGenres + ", " + boughtTracks + " " + sameGenreRec + " UNION " + sameAlbumTracks;
-			// System.out.println(sql);
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			stmt.setInt(1, customerId);
 			stmt.setInt(2, customerId);

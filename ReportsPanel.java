@@ -2,35 +2,20 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
-public class EmployeesPanel extends Component implements ActionListener {
+public class ReportsPanel extends Component implements ActionListener {
 	Panel data;
 	Database db = Database.getInstance();
 	Panel root;
-	Choice columnChoice;
-	TextField filter;
-	int numCols = 8;
+	int numCols = 2;
 
 	public Panel getRoot() {
 		return root;
 	}
 
-	public EmployeesPanel() {
+	public ReportsPanel() {
 		root = new Panel(new BorderLayout());
 		root.setBackground(Color.LIGHT_GRAY);
-		Panel employeeFilter = new Panel(new FlowLayout(FlowLayout.LEFT));
 
-		columnChoice = new Choice();
-		columnChoice.add("First Name");
-		columnChoice.add("Country");
-
-		filter = new TextField(30);
-
-		Button search = new Button("Search");
-		search.addActionListener(this);
-
-		employeeFilter.add(columnChoice);
-		employeeFilter.add(filter);
-		employeeFilter.add(search);
 		ScrollPane scrollPane = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
 		scrollPane.setBackground(Color.RED);
 
@@ -40,38 +25,16 @@ public class EmployeesPanel extends Component implements ActionListener {
 		updateData();
 
 		scrollPane.add(data, 0);
-		root.add(employeeFilter, BorderLayout.NORTH);
 		root.add(scrollPane, BorderLayout.CENTER);
 	}
 
 	private void updateData() {
 		data.removeAll();
 		data.setBackground(Color.DARK_GRAY);
-		data.add(createCell("First Name", true));
-		data.add(createCell("Last Name", true));
-		data.add(createCell("Title", true));
-		data.add(createCell("City", true));
-		data.add(createCell("Country", true));
-		data.add(createCell("Phone", true));
-		data.add(createCell("Reports-to", true));
-		data.add(createCell("Active", true));
+		data.add(createCell("Genre", true));
+		data.add(createCell("Total revenue", true));
 
-		String colString;
-		switch (columnChoice.getSelectedItem()) {
-			case ("First Name"): {
-				colString = "firstname";
-				break;
-			}
-			case ("Country"): {
-				colString = "country";
-				break;
-			}
-			default: {
-				colString = "";
-			}
-		}
-
-		ArrayList<String[]> ret = db.getEmployees(colString, filter.getText());
+		ArrayList<String[]> ret = db.getReport();
 		for (int i = 0; i < ret.size(); i++) {
 			for (int j = 0; j < ret.get(i).length; j++) {
 				data.add(createCell(ret.get(i)[j], false));

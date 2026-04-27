@@ -7,10 +7,9 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 
 	EmployeesPanel ep = new EmployeesPanel();
 	TracksPanel tp = new TracksPanel();
+	ReportsPanel rp = new ReportsPanel();
 
-	Panel tracksPanel;
-	Panel reportPanel;
-	Panel notificationsPanel;
+	NotificationsPanel np = new NotificationsPanel();
 	Panel customerRecommendationsPanel;
 
 	public AWTTabs() {
@@ -40,14 +39,12 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 		cardLayout = new CardLayout();
 		contentPanel = new Panel(cardLayout);
 
-		reportPanel = makeReportPanel();
-		notificationsPanel = makeNotificationsPanel();
 		customerRecommendationsPanel = makeCustomerRecommendationsPanel();
 
 		contentPanel.add(ep.getRoot(), "Employees", 0);
 		contentPanel.add(tp.getRoot(), "Tracks", 1);
-		contentPanel.add(reportPanel, "Report", 2);
-		contentPanel.add(notificationsPanel, "Notifications", 3);
+		contentPanel.add(rp.getRoot(), "Report", 2);
+		contentPanel.add(np.getRoot(), "Notifications", 3);
 		contentPanel.add(customerRecommendationsPanel, "Customer Recommendations", 4);
 
 		add(tabMenu, BorderLayout.NORTH);
@@ -60,15 +57,6 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 		});
 
 		setVisible(true);
-	}
-
-	private Panel makeReportPanel() {
-
-		Panel root = new Panel();
-		root.setBackground(Color.GRAY);
-		root.add(new Label("Report"));
-
-		return root;
 	}
 
 	private Panel makeNotificationsPanel() {
