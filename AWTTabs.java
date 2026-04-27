@@ -13,7 +13,7 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 	RecommendationPanel recp = new RecommendationPanel();
 
 	public AWTTabs() {
-		setTitle("AWT Custom Tabs");
+		setTitle("COS 221 PA4 u24916031");
 		setSize(1280, 720);
 		setLayout(new BorderLayout());
 

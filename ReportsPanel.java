@@ -17,10 +17,8 @@ public class ReportsPanel extends Component implements ActionListener {
 		root.setBackground(Color.LIGHT_GRAY);
 
 		ScrollPane scrollPane = new ScrollPane(ScrollPane.SCROLLBARS_AS_NEEDED);
-		scrollPane.setBackground(Color.RED);
 
 		data = new Panel(new GridLayout(0, numCols, 1, 1));
-		data.setBackground(Color.DARK_GRAY);
 
 		updateData();
 
