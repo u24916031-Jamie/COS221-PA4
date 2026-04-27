@@ -122,7 +122,7 @@ public class TracksPanel extends Component implements ActionListener {
 			case "Add Track":
 
 				Frame parentFrame = (Frame) javax.swing.SwingUtilities.getWindowAncestor(root);
-				MyPopup popup = new MyPopup(parentFrame, "Add Track");
+				AddTrackPopup popup = new AddTrackPopup(parentFrame, "Add Track");
 				popup.setVisible(true);
 				break;
 

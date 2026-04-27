@@ -129,22 +129,21 @@ public class Database {
 		return null;
 	}
 
-	// TrackId, Name, AlbumId, MediaType, GenreId, Composer, Milliseconds, Bytes,
+	// Name, AlbumId, MediaType, GenreId, Composer, Milliseconds, Bytes,
 	// UnitPrice
 	public boolean addTrack(String[] data) {
 		try {
-			String sql = "INSERT INTO track (TrackId, Name, AlbumId, MediaType, GenreId, Composer, Milliseconds, Bytes, UnitPrice)";
-			sql += " VALUES ((SELECT TrackId FROM track ORDER BY TrackId DESC LIMIT 1) + 1, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String sql = "INSERT INTO track (TrackId, Name, AlbumId, MediaTypeId, GenreId, Composer, Milliseconds, UnitPrice)";
+			sql += " VALUES ((SELECT TrackId FROM track ORDER BY TrackId DESC LIMIT 1) + 1, ?, ?, ?, ?, ?, ?, ?)";
 
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			stmt.setString(0, data[0]);
-			stmt.setInt(1, Integer.parseInt(data[1]));
-			stmt.setInt(2, Integer.parseInt(data[2]));
-			stmt.setInt(3, Integer.parseInt(data[3]));
-			stmt.setString(4, data[4]);
-			stmt.setInt(5, Integer.parseInt(data[5]));
-			stmt.setInt(6, Integer.parseInt(data[6]));
-			stmt.setDouble(7, Double.parseDouble(data[7]));
+			stmt.setString(1, data[0]);
+			stmt.setInt(2, Integer.parseInt(data[1]));
+			stmt.setInt(3, Integer.parseInt(data[2]));
+			stmt.setInt(4, Integer.parseInt(data[3]));
+			stmt.setString(5, data[4]);
+			stmt.setInt(6, Integer.parseInt(data[5]));
+			stmt.setDouble(7, Double.parseDouble(data[6]));
 
 			return (stmt.executeUpdate() > 0);
 		} catch (Exception e) {
@@ -180,7 +179,6 @@ public class Database {
 		return null;
 	}
 
-	// TODO
 	public ArrayList<String[]> getCustomers(String column, String filter, boolean inactive) {
 		try {
 			ArrayList<String[]> arr = new ArrayList<>();
@@ -379,4 +377,69 @@ public class Database {
 		return null;
 	}
 
+	public ArrayList<String> getGenres() {
+		try {
+			ArrayList<String> arr = new ArrayList<>();
+			String sql = "SELECT g.name AS genrename FROM genre AS g ORDER BY g.genreid ASC";
+
+			PreparedStatement stmt = conn.prepareStatement(sql);
+
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+
+				arr.add(rs.getString("genrename"));
+			}
+
+			return arr;
+		} catch (Exception e) {
+			System.err.println(e.toString());
+
+		}
+		return null;
+	}
+
+	public ArrayList<String> getAlbums() {
+		try {
+			ArrayList<String> arr = new ArrayList<>();
+			String sql = "SELECT a.title AS albumname FROM album AS a ORDER BY a.albumid ASC";
+
+			PreparedStatement stmt = conn.prepareStatement(sql);
+
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+
+				arr.add(rs.getString("albumname"));
+			}
+
+			return arr;
+		} catch (Exception e) {
+			System.err.println(e.toString());
+
+		}
+		return null;
+	}
+
+	public ArrayList<String> getMediaTypes() {
+		try {
+			ArrayList<String> arr = new ArrayList<>();
+			String sql = "SELECT mt.name AS mediatypename FROM mediatype AS mt ORDER BY mt.mediatypeid ASC";
+
+			PreparedStatement stmt = conn.prepareStatement(sql);
+
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+
+				arr.add(rs.getString("mediatypename"));
+			}
+
+			return arr;
+		} catch (Exception e) {
+			System.err.println(e.toString());
+
+		}
+		return null;
+	}
 }
