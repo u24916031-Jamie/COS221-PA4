@@ -8,9 +8,9 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 	EmployeesPanel ep = new EmployeesPanel();
 	TracksPanel tp = new TracksPanel();
 	ReportsPanel rp = new ReportsPanel();
-
 	NotificationsPanel np = new NotificationsPanel();
-	Panel customerRecommendationsPanel;
+
+	RecommendationPanel recp = new RecommendationPanel();
 
 	public AWTTabs() {
 		setTitle("AWT Custom Tabs");
@@ -39,13 +39,11 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 		cardLayout = new CardLayout();
 		contentPanel = new Panel(cardLayout);
 
-		customerRecommendationsPanel = makeCustomerRecommendationsPanel();
-
 		contentPanel.add(ep.getRoot(), "Employees", 0);
 		contentPanel.add(tp.getRoot(), "Tracks", 1);
 		contentPanel.add(rp.getRoot(), "Report", 2);
 		contentPanel.add(np.getRoot(), "Notifications", 3);
-		contentPanel.add(customerRecommendationsPanel, "Customer Recommendations", 4);
+		contentPanel.add(recp.getRoot(), "Customer Recommendations", 4);
 
 		add(tabMenu, BorderLayout.NORTH);
 		add(contentPanel, BorderLayout.CENTER);
@@ -57,22 +55,6 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 		});
 
 		setVisible(true);
-	}
-
-	private Panel makeNotificationsPanel() {
-		Panel root = new Panel();
-		root.setBackground(Color.GRAY);
-		root.add(new Label("Notifications"));
-
-		return root;
-	}
-
-	private Panel makeCustomerRecommendationsPanel() {
-		Panel root = new Panel();
-		root.setBackground(Color.GRAY);
-		root.add(new Label("Customer Recommendations"));
-
-		return root;
 	}
 
 	public void actionPerformed(ActionEvent e) {

@@ -324,7 +324,7 @@ public class Database {
 		try {
 			ArrayList<String[]> arr = new ArrayList<>();
 			// total spent, num purcahses, date of most recent purchase
-			String sql = "SELECT g.genreid AS genreid, g.name AS genrename, COUNT(g.genreid) AS genrecount FROM customer AS c NATURAL JOIN invoice AS i NATURAL JOIN invoiceline AS il NATURAL JOIN track AS t JOIN genre AS g ON t.GenreId = g.genreid WHERE customerid = ? GROUP BY g.genreid ORDER BY COUNT(g.genreid) DESC";
+			String sql = "SELECT g.genreid AS genreid, g.name AS genrename, COUNT(g.genreid) AS genrecount FROM customer AS c JOIN invoice AS i ON c.customerid = i.customerid JOIN invoiceline AS il ON il.InvoiceId = i.invoiceid JOIN track AS t ON il.trackid = t.trackid JOIN genre AS g ON t.GenreId = g.genreid WHERE c.customerid = ? GROUP BY g.genreid ORDER BY COUNT(g.genreid) DESC, g.genreid DESC";
 
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			stmt.setInt(1, customerId);
@@ -353,7 +353,7 @@ public class Database {
 			ArrayList<String[]> arr = new ArrayList<>();
 			// total spent, num purcahses, date of most recent purchase
 
-			String mostFreqGenres = "WITH freqgenres AS (SELECT g.genreid AS genreid, COUNT(g.genreid) AS genrecount FROM customer AS c JOIN invoice AS i ON c.customerid = i.customerid JOIN invoiceline AS il ON i.invoiceid = il.invoiceid JOIN track AS t ON il.trackid = t.trackid JOIN genre AS g ON t.GenreId = g.genreid WHERE c.customerid = ? GROUP BY g.genreid ORDER BY COUNT(g.genreid) DESC)";
+			String mostFreqGenres = "WITH freqgenres AS (SELECT g.genreid AS genreid, COUNT(g.genreid) AS genrecount FROM customer AS c JOIN invoice AS i ON c.customerid = i.customerid JOIN invoiceline AS il ON i.invoiceid = il.invoiceid JOIN track AS t ON il.trackid = t.trackid JOIN genre AS g ON t.GenreId = g.genreid WHERE c.customerid = ? GROUP BY g.genreid ORDER BY COUNT(g.genreid) DESC, g.genreid DESC)";
 			String boughtTracks = "boughttracks AS (SELECT t.trackid AS boughtid, t.albumid AS boughtalbum FROM track AS t JOIN invoiceline AS il ON t.trackid = il.trackid JOIN invoice AS i ON il.invoiceid = i.invoiceid JOIN customer AS c ON c.customerid = i.customerid WHERE c.customerid = ?)";
 			String sameGenreRec = "(SELECT t.trackid AS rectrack FROM track AS t JOIN freqgenres ON freqgenres.genreid = t.genreid WHERE t.trackid NOT IN (SELECT boughtid FROM boughttracks) LIMIT 10)";
 
@@ -370,7 +370,7 @@ public class Database {
 
 				int temp = rs.getInt("rectrack");
 
-				arr.add(getTracks("", "", temp, 0).get(0));
+				arr.add(getTracks("", "", temp, 1).get(0));
 			}
 
 			return arr;
@@ -446,4 +446,28 @@ public class Database {
 		}
 		return null;
 	}
+
+	public String[] getRecommendationData(int customerId) {
+		try {
+			String sql = "SELECT SUM(i.total) AS totalspent, COUNT(DISTINCT i.invoiceid) AS totalpurchases, MAX(i.invoicedate) AS lastpurchase FROM invoice AS i JOIN customer AS c ON i.customerid = c.customerid WHERE c.customerid = ?";
+
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setInt(1, customerId);
+			ResultSet rs = stmt.executeQuery();
+			String[] arr = new String[3];
+			while (rs.next()) {
+
+				arr[0] = rs.getString("totalspent");
+				arr[1] = rs.getString("totalpurchases");
+				arr[2] = rs.getString("lastpurchase");
+			}
+
+			return arr;
+		} catch (Exception e) {
+			System.err.println(e.toString());
+
+		}
+		return null;
+	}
+
 }
