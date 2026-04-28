@@ -25,11 +25,7 @@ public class RecommendationPanel extends Component implements ItemListener {
 
 		customerChoice = new Choice();
 		customerChoice.addItemListener(this);
-		ArrayList<String[]> temp = db.getCustomers("", "", false, -1);
-		for (int i = 0; i < temp.size(); i++) {
-			customers.add(temp.get(i)[1] + " " + temp.get(i)[2]);
-			customerChoice.add(temp.get(i)[1] + " " + temp.get(i)[2]);
-		}
+		updateCustomers();
 		filterBar.add(customerChoice);
 
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -101,12 +97,30 @@ public class RecommendationPanel extends Component implements ItemListener {
 		int customerId = customers.indexOf(customerChoice.getSelectedItem()) + 1;
 		String[] data = db.getRecommendationData(customerId);
 		ArrayList<String[]> favGenres = db.getFavGenres(customerId);
+		String favGenreName;
+		if (favGenres.size() == 0) {
+			favGenreName = "None";
+		} else {
 
+			favGenreName = favGenres.get(0)[1];
+		}
 		totalSpent.setText("Total spent: " + data[0]);
 		totalPurchases.setText("Total purchases: " + data[1]);
 		lastPurchase.setText("Last purchase: " + data[2]);
-		favGenre.setText("Favourite genre: " + favGenres.get(0)[1]);
+		favGenre.setText("Favourite genre: " + favGenreName);
 		lastPurchase.getParent().revalidate();
 		lastPurchase.getParent().repaint();
+	}
+
+	public void updateCustomers() {
+		ArrayList<String[]> temp = db.getCustomers("", "", false, -1);
+		customers.clear();
+		customerChoice.removeAll();
+		for (int i = 0; i < temp.size(); i++) {
+			customers.add(temp.get(i)[1] + " " + temp.get(i)[2]);
+			customerChoice.add(temp.get(i)[1] + " " + temp.get(i)[2]);
+		}
+		customerChoice.revalidate();
+		customerChoice.repaint();
 	}
 }

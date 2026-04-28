@@ -59,13 +59,14 @@ public class AWTTabs extends Frame implements ItemListener, ActionListener {
 
 	public void actionPerformed(ActionEvent e) {
 		String cmd = e.getActionCommand();
-		System.out.println(cmd);
+		if (cmd == "Customer Recommendations") {
+			recp.updateCustomers();
+		}
 		cardLayout.show(contentPanel, cmd);
 	}
 
 	public void itemStateChanged(ItemEvent e) {
 
 		String cmd = e.getItem().toString();
-		System.out.println(cmd);
 	}
 }
